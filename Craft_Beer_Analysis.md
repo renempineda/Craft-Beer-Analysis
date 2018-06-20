@@ -36,27 +36,19 @@ Due to the small size and explosive growth of craft breweries, the total number 
 
 
 ```r
-# Check the working directory
-getwd()
-```
-
-```
-## [1] "E:/Mahesh/SMU/MSDS6306 Doing Data Science/Homework/Craft-Beer-Analysis/Rene Pineda Analysis"
-```
-
-```r
-#Rene's working directory
-#setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6306 Doing Data Science/Craft Beer Analysis/Rene Pineda Analysis")
-
-#Mahesh's working directory
-setwd("E:/Mahesh/SMU/MSDS6306 Doing Data Science/Homework/Craft-Beer-Analysis")
-
-#Set up your working directory here
-
-#Load additional packages
+#Load the required libraries
 library(dplyr)
 library(ggplot2)
-      
+library(ggmap)
+library(maps)
+library(mapdata)
+
+#Rene's working directory
+setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6306 Doing Data Science/Craft Beer Analysis")
+
+#Mahesh's working directory
+#setwd("E:/Mahesh/SMU/MSDS6306 Doing Data Science/Homework/Craft-Beer-Analysis")
+
 # Load the datasets
 Beers <- read.csv("Beers.csv", header = TRUE)
 Breweries <- read.csv("Breweries.csv", header = TRUE)
@@ -175,6 +167,38 @@ WI   |20
 WV   |1
 WY   |4
 
+We can also create a heatmap:
+
+
+```r
+#Create Table
+BreweriesState <- as.data.frame(table(Breweries$State, useNA = "no"))
+
+#Eliminate HI and AK observations
+BreweriesState <- BreweriesState[c(2:11,13:51),]
+
+#Reordering observations to fit the order of each State in the map dataset
+BreweriesState <- BreweriesState[(c(1,3,2,4:6,8,7,9:10,12,13,14,11,15:17,20,19,18,21:22,24,23,25,28,32,29,30,31,33,26,27,34:43,45,44,46,48,47,49)),]
+#Create table with State Names
+states <- map_data("state")
+StateNames <- unique(states$region)
+
+#Joing the datasets to include mapping information
+BreweriesState <- cbind(BreweriesState, StateNames)
+names(BreweriesState) <- c("State.abb", "Number.of.Breweries", "region")
+BreweriesState.map <- inner_join(states, BreweriesState, by = "region")
+
+#Create the heatap
+ggplot(data = BreweriesState.map) +
+  geom_polygon(aes(x = long, y = lat, fill = Number.of.Breweries, group = group), color = "black") +
+  coord_fixed(1.3) +
+  scale_fill_gradientn(colours=rev(heat.colors(10)),na.value="grey90")
+```
+
+![](Craft_Beer_Analysis_files/figure-html/Heat Map-1.png)<!-- -->
+
+In the map above we can see that the Pacific Coast, Colorado, Texas, and some parts of the Northeast are regions with increased number of breweries
+
 ### Question 2. Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.
 
 
@@ -188,53 +212,8 @@ Beers <- rename(Beers, Brewery_ID = Brewery_id, Beer_Name = Name)
 Beers <- Beers[order(Beers$Brewery_ID,Beers$Beer_ID),]
 
 #Check if the Brewery_ID values are the same in order to make sure they can be easily merged
-unique(Beers$Brewery_ID) == unique(Breweries$Brewery_ID)
-```
+invisible(unique(Beers$Brewery_ID) == unique(Breweries$Brewery_ID))
 
-```
-##   [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-##  [15] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-##  [29] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-##  [43] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-##  [57] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-##  [71] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-##  [85] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-##  [99] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [113] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [127] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [141] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [155] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [169] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [183] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [197] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [211] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [225] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [239] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [253] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [267] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [281] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [295] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [309] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [323] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [337] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [351] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [365] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [379] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [393] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [407] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [421] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [435] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [449] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [463] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [477] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [491] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [505] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [519] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [533] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-## [547] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-```
-
-```r
 #Merge the datasets by Brewery_ID
 MergedBeers <- merge(x = Beers, y = Breweries, by = "Brewery_ID", all = TRUE)
 str(MergedBeers)
@@ -337,14 +316,14 @@ IBU.median <- sapply(split(MergedBeers, MergedBeers$State), function(y) median(y
 
 ##plot a bar chart to compare
 ##Barplot of ABV value(s) vs State
-barplot(ABV.median, main="ABV vs State", xlab="State", ylab="ABV Value(s)", las=2)
+barplot(ABV.median, main="ABV vs State", xlab="State", ylab="ABV Value(s)", cex.axis = 0.8, cex.names = 0.6, las=2)
 ```
 
 ![](Craft_Beer_Analysis_files/figure-html/Question 4-1.png)<!-- -->
 
 ```r
 ##Barplot of IBV value(s) vs State
-barplot(ABV.median, main="IBV vs State", xlab="State", ylab="IBV Value(s)", las=2)
+barplot(ABV.median, main="IBV vs State", xlab="State", ylab="IBV Value(s)", cex.axis = 0.8, cex.names = 0.6,las=2)
 ```
 
 ![](Craft_Beer_Analysis_files/figure-html/Question 4-2.png)<!-- -->
@@ -410,6 +389,8 @@ summary(MergedBeers$ABV)
 ```r
 ##Scatter plot between bitterness of beer and its alcoholic content
 plot(ABV~IBU, data=MergedBeers)
+#Add regression line
+abline(lm(ABV ~ IBU, data = MergedBeers), col="red")
 ```
 
 ![](Craft_Beer_Analysis_files/figure-html/Question 7-1.png)<!-- -->

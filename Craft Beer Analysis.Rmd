@@ -35,21 +35,20 @@ Due to the small size and explosive growth of craft breweries, the total number 
 ## **Section 2** Preparatory Steps
 
 ```{r preparatory steps, echo=TRUE, warning=FALSE, message=FALSE}
-# Check the working directory
-getwd()
 
-#Rene's working directory
-#setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6306 Doing Data Science/Craft Beer Analysis/Rene Pineda Analysis")
-
-#Mahesh's working directory
-setwd("E:/Mahesh/SMU/MSDS6306 Doing Data Science/Homework/Craft-Beer-Analysis")
-
-#Set up your working directory here
-
-#Load additional packages
+#Load the required libraries
 library(dplyr)
 library(ggplot2)
-      
+library(ggmap)
+library(maps)
+library(mapdata)
+
+#Rene's working directory
+setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6306 Doing Data Science/Craft Beer Analysis")
+
+#Mahesh's working directory
+#setwd("E:/Mahesh/SMU/MSDS6306 Doing Data Science/Homework/Craft-Beer-Analysis")
+
 # Load the datasets
 Beers <- read.csv("Beers.csv", header = TRUE)
 Breweries <- read.csv("Breweries.csv", header = TRUE)
@@ -121,6 +120,35 @@ WI   |20
 WV   |1
 WY   |4
 
+We can also create a heatmap:
+
+```{r Heat Map, echo = TRUE,warning=FALSE, message=FALSE}
+#Create Table
+BreweriesState <- as.data.frame(table(Breweries$State, useNA = "no"))
+
+#Eliminate HI and AK observations
+BreweriesState <- BreweriesState[c(2:11,13:51),]
+
+#Reordering observations to fit the order of each State in the map dataset
+BreweriesState <- BreweriesState[(c(1,3,2,4:6,8,7,9:10,12,13,14,11,15:17,20,19,18,21:22,24,23,25,28,32,29,30,31,33,26,27,34:43,45,44,46,48,47,49)),]
+#Create table with State Names
+states <- map_data("state")
+StateNames <- unique(states$region)
+
+#Joing the datasets to include mapping information
+BreweriesState <- cbind(BreweriesState, StateNames)
+names(BreweriesState) <- c("State.abb", "Number.of.Breweries", "region")
+BreweriesState.map <- inner_join(states, BreweriesState, by = "region")
+
+#Create the heatap
+ggplot(data = BreweriesState.map) +
+  geom_polygon(aes(x = long, y = lat, fill = Number.of.Breweries, group = group), color = "black") +
+  coord_fixed(1.3) +
+  scale_fill_gradientn(colours=rev(heat.colors(10)),na.value="grey90")
+```
+
+In the map above we can see that the Pacific Coast, Colorado, Texas, and some parts of the Northeast are regions with increased number of breweries
+
 ### Question 2. Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.
 
 ```{r Question 2, echo=TRUE,warning=FALSE, message=FALSE}
@@ -133,7 +161,7 @@ Beers <- rename(Beers, Brewery_ID = Brewery_id, Beer_Name = Name)
 Beers <- Beers[order(Beers$Brewery_ID,Beers$Beer_ID),]
 
 #Check if the Brewery_ID values are the same in order to make sure they can be easily merged
-unique(Beers$Brewery_ID) == unique(Breweries$Brewery_ID)
+invisible(unique(Beers$Brewery_ID) == unique(Breweries$Brewery_ID))
 
 #Merge the datasets by Brewery_ID
 MergedBeers <- merge(x = Beers, y = Breweries, by = "Brewery_ID", all = TRUE)
@@ -161,9 +189,9 @@ IBU.median <- sapply(split(MergedBeers, MergedBeers$State), function(y) median(y
 
 ##plot a bar chart to compare
 ##Barplot of ABV value(s) vs State
-barplot(ABV.median, main="ABV vs State", xlab="State", ylab="ABV Value(s)", las=2)
+barplot(ABV.median, main="ABV vs State", xlab="State", ylab="ABV Value(s)", cex.axis = 0.8, cex.names = 0.6, las=2)
 ##Barplot of IBV value(s) vs State
-barplot(ABV.median, main="IBV vs State", xlab="State", ylab="IBV Value(s)", las=2)
+barplot(ABV.median, main="IBV vs State", xlab="State", ylab="IBV Value(s)", cex.axis = 0.8, cex.names = 0.6,las=2)
 ```
 
 ### 5. Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?
@@ -172,7 +200,6 @@ barplot(ABV.median, main="IBV vs State", xlab="State", ylab="IBV Value(s)", las=
 ```{r Question 5, echo = TRUE,warning=FALSE, message=FALSE}
 ##State with maximum alcoholic (ABV) beer
 which(MergedBeers$ABV == max(MergedBeers$ABV, na.rm=TRUE))
-
 MergedBeers$State[which(MergedBeers$ABV == max(MergedBeers$ABV, na.rm=T))]
 
 ## State with maximum alcoholic (IBU) beer
@@ -194,7 +221,8 @@ summary(MergedBeers$ABV)
 ```{r Question 7, echo = TRUE,warning=FALSE, message=FALSE}
 ##Scatter plot between bitterness of beer and its alcoholic content
 plot(ABV~IBU, data=MergedBeers)
-
+#Add regression line
+abline(lm(ABV ~ IBU, data = MergedBeers), col="red")
 ```
 
 

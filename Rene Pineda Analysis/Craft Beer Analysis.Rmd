@@ -39,7 +39,10 @@ Due to the small size and explosive growth of craft breweries, the total number 
 getwd()
 
 #Rene's working directory
-setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6306 Doing Data Science/Craft Beer Analysis/Rene Pineda Analysis")
+#setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6306 Doing Data Science/Craft Beer Analysis/Rene Pineda Analysis")
+
+#Mahesh's working directory
+setwd("E:/Mahesh/SMU/MSDS6306 Doing Data Science/Homework/Craft-Beer-Analysis")
 
 #Set up your working directory here
 
@@ -199,6 +202,7 @@ plot(IBU~ABV, data=MergedBeers)
 abline(lm(IBU~ABV, data=MergedBeers), col="red")
 
 ```
+
 
 ## **Section 4** Conclusions
 

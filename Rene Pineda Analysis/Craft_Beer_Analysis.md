@@ -41,12 +41,15 @@ getwd()
 ```
 
 ```
-## [1] "E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6306 Doing Data Science/Craft Beer Analysis/Rene Pineda Analysis"
+## [1] "E:/Mahesh/SMU/MSDS6306 Doing Data Science/Homework/Craft-Beer-Analysis/Rene Pineda Analysis"
 ```
 
 ```r
 #Rene's working directory
-setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6306 Doing Data Science/Craft Beer Analysis/Rene Pineda Analysis")
+#setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6306 Doing Data Science/Craft Beer Analysis/Rene Pineda Analysis")
+
+#Mahesh's working directory
+setwd("E:/Mahesh/SMU/MSDS6306 Doing Data Science/Homework/Craft-Beer-Analysis")
 
 #Set up your working directory here
 
@@ -324,11 +327,99 @@ Two columns have NA's: ABV has 62 and IBU has 1005, out of 2410 total rows
 
 ### 4. Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare.
 
+
+```r
+## First do not select data with NA as their mean would be NA then so use split MergedBeers on state and
+## get the mean of the split values with na.rm = TRUE
+ABV.median <- sapply(split(MergedBeers, MergedBeers$State), function(y) median(y$ABV, na.rm = TRUE))
+
+IBU.median <- sapply(split(MergedBeers, MergedBeers$State), function(y) median(y$IBU, na.rm = TRUE))
+
+## Sort it in descending order
+ABV.median.sort <- ABV.median[order(-ABV.median)]
+
+IBU.median.sort <- ABV.median[order(-ABV.median)]
+
+##plot a bar chart to compare
+##Barplot of ABV value(s) vs State
+barplot(ABV.median.sort, main="ABV vs State", xlab="State", ylab="ABV Value(s)", las=2)
+```
+
+![](Craft_Beer_Analysis_files/figure-html/Question 4-1.png)<!-- -->
+
+```r
+##Barplot of IBV value(s) vs State
+barplot(IBU.median.sort, main="IBV vs State", xlab="State", ylab="IBV Value(s)", las=2)
+```
+
+![](Craft_Beer_Analysis_files/figure-html/Question 4-2.png)<!-- -->
+
 ### 5. Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?
+#### State that has maximum alcoholic (ABV) beer is CO.  
+#### State that has most bitter (IBU) beer is OR.  
+
+```r
+##State with maximum alcoholic (ABV) beer
+which(MergedBeers$ABV == max(MergedBeers$ABV, na.rm=TRUE))
+```
+
+```
+## [1] 392
+```
+
+```r
+MergedBeers$State[which(MergedBeers$ABV == max(MergedBeers$ABV, na.rm=T))]
+```
+
+```
+## [1]  CO
+## 51 Levels:  AK  AL  AR  AZ  CA  CO  CT  DC  DE  FL  GA  HI  IA  ID ...  WY
+```
+
+```r
+## State with maximum alcoholic (IBU) beer
+MergedBeers$State[which(MergedBeers$IBU == max(MergedBeers$IBU, na.rm=T))]
+```
+
+```
+## [1]  OR
+## 51 Levels:  AK  AL  AR  AZ  CA  CO  CT  DC  DE  FL  GA  HI  IA  ID ...  WY
+```
 
 ### 6. Summary statistics for the ABV variable.
 
+
+```r
+##Sumary statistics for the ABV variable from the Beers dataset
+summary(Beers$ABV)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+## 0.00100 0.05000 0.05600 0.05977 0.06700 0.12800      62
+```
+
+```r
+## Summary statistics for the ABV variable of the merged dataset
+summary(MergedBeers$ABV)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+## 0.00100 0.05000 0.05600 0.05977 0.06700 0.12800      62
+```
+
 ### 7. Is there an apparent relationship between the bitterness of the beer and its alcoholic content? Draw a scatter plot.
+#### There seems to be an apparent relationship between the bitterness of the beer and its alcoholic content  
+
+```r
+##Scatter plot between bitterness of beer and its alcoholic content
+plot(IBU~ABV, data=MergedBeers)
+abline(lm(IBU~ABV, data=MergedBeers), col="red")
+```
+
+![](Craft_Beer_Analysis_files/figure-html/Question 7-1.png)<!-- -->
+
 
 ## **Section 4** Conclusions
 

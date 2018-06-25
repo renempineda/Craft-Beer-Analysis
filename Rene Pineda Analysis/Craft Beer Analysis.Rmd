@@ -1,7 +1,7 @@
 ---
 title: "Craft Beer Analysis"
 author: "Chaoshun Hu, Mahesh Kuklani, Rene Pineda"
-date: "June 13, 2018"
+date: "June 25, 2018"
 output:
   html_document:
     keep_md: true
@@ -42,8 +42,11 @@ getwd()
 #setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6306 Doing Data Science/Craft Beer Analysis/Rene Pineda Analysis")
 
 #Mahesh's working directory
-setwd("E:/Mahesh/SMU/MSDS6306 Doing Data Science/Homework/Craft-Beer-Analysis")
+#setwd("E:/Mahesh/SMU/MSDS6306 Doing Data Science/Homework/Craft-Beer-Analysis")
 
+#Chaoshun's working directory
+#setwd("C:/Users/chux/Downloads/study1/study1")
+setwd("/Users/chux/Desktop/datascience/Homework/Doing_Data_Science/study1")
 #Set up your working directory here
 
 #Load additional packages
@@ -162,13 +165,13 @@ IBU.median <- sapply(split(MergedBeers, MergedBeers$State), function(y) median(y
 ## Sort it in descending order
 ABV.median.sort <- ABV.median[order(-ABV.median)]
 
-IBU.median.sort <- ABV.median[order(-ABV.median)]
+IBU.median.sort <- IBU.median[order(-IBU.median)]
 
 ##plot a bar chart to compare
 ##Barplot of ABV value(s) vs State
 barplot(ABV.median.sort, main="ABV vs State", xlab="State", ylab="ABV Value(s)", las=2)
-##Barplot of IBV value(s) vs State
-barplot(IBU.median.sort, main="IBV vs State", xlab="State", ylab="IBV Value(s)", las=2)
+##Barplot of IBU value(s) vs State
+barplot(IBU.median.sort, main="IBU vs State", xlab="State", ylab="IBU Value(s)", las=2)
 ```
 
 ### 5. Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?
@@ -205,5 +208,11 @@ abline(lm(IBU~ABV, data=MergedBeers), col="red")
 
 
 ## **Section 4** Conclusions
+In summary, this primary objective of this work is to take two different data files which are beer and breweries data, read the data from the a csv file into a data frame, inspect and understand the structure of the data, merge the data frames, and perform some analysis on the final data set.
 
-Pending
+As Data Scientist, it is very rare to work only on a single perfect data and thus a large percentage of work will be accept different datasets, merge different available data sets before processing it as illustrated in this work. After preparing the data, statistical inference can then be made to the data. 
+
+Based on the analysis, California and Colorado are top two which have most breweries. If order the all the data by Brewery and Beer IDs. The first six observations include beer names: Parapet ESB, Stronghold, Pumpion, Wall's End, Maggie's Leap and Get Together. The last 6 obervations include beer names: Pilsner Ukiah, Porkslap Pale Ale, Moo Thunder Stout, Snapperhead IPA, Heinnieweisse Weissebier and Urban Wilderness Pale Ale; Out of 2410 total rows of the data, there are two columns having NA's: ABV has 62 and IBU has 1005. 
+
+After computing the median alcohol content and international bitterness unit for each state. DC has the highest median ABV, MS has the highest median IBV; UT has the lowest median ABV, SD has the lowest median IBV. But Co has the mximum alcoholic (ABV) beer and OR has the most bitter(IBU) beer. Afer running the summary statistics to ABV variable, the min ABV is 0.001 and the max ABV is 0.128. The Mean is 0.05977 and the median is 0.056. It has a littble bit skewness here. Based on the scatter plot, there is no linear relation between the bitterness of the beer and the alcoholic cotent.
+

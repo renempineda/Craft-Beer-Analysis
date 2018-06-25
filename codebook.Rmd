@@ -1,0 +1,438 @@
+---
+title: "Craft Beer Analysis codeBook"
+author: "Rene Pineda, Mahesh Kuklani, Chaoshun Hu"
+date: "June 25, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Project Description
+
+The Beers dataset contains a list of 2410 US craft beers and Breweries dataset contains 558 US breweries. The datasets descriptions are as follows.
+
+## Beer data description
+
+###report overview
+The beer dataset examined has the following dimensions:
+
+
+---------------------------------
+Feature                    Result
+------------------------ --------
+Number of observations       2410
+
+Number of variables             7
+---------------------------------
+
+
+### Beer data summary table
+
+------------------------------------------------------------------------
+Label   Variable            Class       # unique  Missing  Description  
+                                          values                        
+------- ------------------- --------- ---------- --------- -------------
+        **[Name]**          factor          2305  0.00 %                
+
+        **[Beer\_ID]**      integer         2410  0.00 %                
+
+        **[ABV]**           numeric           75  2.57 %                
+
+        **[IBU]**           integer          108  41.70 %               
+
+        **[Brewery\_id]**   integer          558  0.00 %                
+
+        **[Style]**         factor           100  0.00 %                
+
+        **[Ounces]**        numeric            7  0.00 %                
+------------------------------------------------------------------------
+
+
+
+
+### Beer data variable list
+#### Name
+
+
+---------------------------------------------
+Feature                                Result
+------------------------- -------------------
+Variable type                          factor
+
+Number of missing obs.                0 (0 %)
+
+Number of unique values                  2305
+
+Mode                        "Nonstop Hef Hop"
+---------------------------------------------
+
+---
+
+#### Beer\_ID
+
+
+-------------------------------------------
+Feature                              Result
+------------------------- -----------------
+Variable type                       integer
+
+Number of missing obs.              0 (0 %)
+
+Number of unique values                2410
+
+Median                               1453.5
+
+1st and 3rd quartiles       808.25; 2075.75
+
+Min. and max.                       1; 2692
+-------------------------------------------
+
+
+
+
+---
+
+#### ABV
+
+
+---------------------------------------
+Feature                          Result
+------------------------- -------------
+Variable type                   numeric
+
+Number of missing obs.      62 (2.57 %)
+
+Number of unique values              74
+
+Median                             0.06
+
+1st and 3rd quartiles        0.05; 0.07
+
+Min. and max.                   0; 0.13
+---------------------------------------
+
+
+
+
+---
+
+#### IBU
+
+
+-----------------------------------------
+Feature                            Result
+------------------------- ---------------
+Variable type                     integer
+
+Number of missing obs.      1005 (41.7 %)
+
+Number of unique values               107
+
+Median                                 35
+
+1st and 3rd quartiles              21; 64
+
+Min. and max.                      4; 138
+-----------------------------------------
+
+---
+
+#### Brewery\_id
+
+
+-----------------------------------
+Feature                      Result
+------------------------- ---------
+Variable type               integer
+
+Number of missing obs.      0 (0 %)
+
+Number of unique values         558
+
+Median                          206
+
+1st and 3rd quartiles       94; 367
+
+Min. and max.                1; 558
+-----------------------------------
+
+
+
+
+---
+
+#### Style
+
+
+------------------------------------------
+Feature                             Result
+------------------------- ----------------
+Variable type                       factor
+
+Number of missing obs.             0 (0 %)
+
+Number of unique values                100
+
+Mode                        "American IPA"
+------------------------------------------
+
+
+
+
+---
+
+### Ounces
+
+
+-----------------------------------
+Feature                      Result
+------------------------- ---------
+Variable type               numeric
+
+Number of missing obs.      0 (0 %)
+
+Number of unique values           7
+
+Median                           12
+
+1st and 3rd quartiles        12; 16
+
+Min. and max.               8.4; 32
+-----------------------------------
+
+---
+
+## Breweries data description
+
+### report overview
+The breweries dataset examined has the following dimensions:
+
+
+---------------------------------
+Feature                    Result
+------------------------ --------
+Number of observations        558
+
+Number of variables             4
+---------------------------------
+
+
+### Breweries data summary table
+
+---------------------------------------------------------------------
+Label   Variable         Class       # unique  Missing  Description  
+                                       values                        
+------- ---------------- --------- ---------- --------- -------------
+        **[Brew\_ID]**   integer          558  0.00 %                
+
+        **[Name]**       factor           551  0.00 %                
+
+        **[City]**       factor           384  0.00 %                
+
+        **[State]**      factor            51  0.00 %                
+---------------------------------------------------------------------
+
+
+
+
+### Variable list
+
+#### Brew ID
+
+
+------------------------------------------
+Feature                             Result
+------------------------- ----------------
+Variable type                      integer
+
+Number of missing obs.             0 (0 %)
+
+Number of unique values                558
+
+Median                               279.5
+
+1st and 3rd quartiles       140.25; 418.75
+
+Min. and max.                       1; 558
+------------------------------------------
+
+
+
+
+---
+
+#### Name
+
+
+------------------------------------------------
+Feature                                   Result
+------------------------- ----------------------
+Variable type                             factor
+
+Number of missing obs.                   0 (0 %)
+
+Number of unique values                      551
+
+Mode                        "Blackrocks Brewery"
+------------------------------------------------
+
+
+
+
+---
+
+#### City
+
+
+--------------------------------------
+Feature                         Result
+------------------------- ------------
+Variable type                   factor
+
+Number of missing obs.         0 (0 %)
+
+Number of unique values            384
+
+Mode                        "Portland"
+--------------------------------------
+
+
+
+
+---
+
+#### State
+
+
+-----------------------------------
+Feature                      Result
+------------------------- ---------
+Variable type                factor
+
+Number of missing obs.      0 (0 %)
+
+Number of unique values          51
+
+Mode                          " CO"
+-----------------------------------
+
+---
+
+## **Section 4** Preparatory Steps
+
+
+```{r, echo=FALSE}
+# Check the working directory
+getwd()
+```
+
+```
+## [1] "C:/Users/chux/Downloads/study1/study1/Rene Pineda Analysis"
+```
+
+```{r, echo=FALSE}
+#Rene's working directory
+#setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6306 Doing Data Science/Craft Beer Analysis/Rene Pineda Analysis")
+
+#Mahesh's working directory
+#setwd("E:/Mahesh/SMU/MSDS6306 Doing Data Science/Homework/Craft-Beer-Analysis")
+
+#Chaoshun's working directory
+#setwd("C:/Users/chux/Downloads/study1/study1")
+setwd("/Users/chux/Desktop/datascience/Homework/Doing_Data_Science/study1")
+#Set up your working directory here
+
+#Load additional packages
+library(dplyr)
+library(ggplot2)
+      
+# Load the datasets
+Beers <- read.csv("Beers.csv", header = TRUE)
+Breweries <- read.csv("Breweries.csv", header = TRUE)
+
+Breweries <- rename(Breweries, Brewery_ID = Brew_ID, Brewery_Name = Name )
+Beers <- rename(Beers, Brewery_ID = Brewery_id, Beer_Name = Name)
+
+#Order the data by Brewery and Beer_ID (not necessary because we are using the merge command, but useful anyway)
+Beers <- Beers[order(Beers$Brewery_ID,Beers$Beer_ID),]
+
+#Merge the datasets by Brewery_ID
+MergedBeers <- merge(x = Beers, y = Breweries, by = "Brewery_ID", all = TRUE)
+```
+
+## **Section 5** Questions
+
+### Question 1. How many breweries are present in each State?
+```{r Question 1, echo = TRUE,warning=FALSE, message=FALSE}
+table(Breweries$State, useNA = "no")
+```
+
+### Question 2. Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.
+```{r, echo=FALSE}
+head(MergedBeers, 6)
+tail(MergedBeers, 6)
+```
+
+### Question 3. Report the number of NA's in each column.
+```{r Question 3, echo=TRUE,warning=FALSE, message=FALSE}
+sapply(MergedBeers, function(y) sum(is.na(y)))
+```
+Two columns have NA's: ABV has 62 and IBU has 1005, out of 2410 total rows
+
+```
+
+### 4. Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare.
+
+```{r Question 4, echo = TRUE,warning=FALSE, message=FALSE}
+## First do not select data with NA as their mean would be NA then so use split MergedBeers on state and
+## get the mean of the split values with na.rm = TRUE
+ABV.median <- sapply(split(MergedBeers, MergedBeers$State), function(y) median(y$ABV, na.rm = TRUE))
+
+IBU.median <- sapply(split(MergedBeers, MergedBeers$State), function(y) median(y$IBU, na.rm = TRUE))
+
+## Sort it in descending order
+ABV.median.sort <- ABV.median[order(-ABV.median)]
+
+IBU.median.sort <- IBU.median[order(-IBU.median)]
+
+##plot a bar chart to compare
+##Barplot of ABV value(s) vs State
+barplot(ABV.median.sort, main="ABV vs State", xlab="State", ylab="ABV Value(s)", las=2)
+##Barplot of IBU value(s) vs State
+barplot(IBU.median.sort, main="IBU vs State", xlab="State", ylab="IBU Value(s)", las=2)
+```
+
+### 5. Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?
+#### State that has maximum alcoholic (ABV) beer is CO.  
+#### State that has most bitter (IBU) beer is OR.  
+```{r Question 5, echo = TRUE,warning=FALSE, message=FALSE}
+##State with maximum alcoholic (ABV) beer
+which(MergedBeers$ABV == max(MergedBeers$ABV, na.rm=TRUE))
+
+MergedBeers$State[which(MergedBeers$ABV == max(MergedBeers$ABV, na.rm=T))]
+
+## State with maximum alcoholic (IBU) beer
+MergedBeers$State[which(MergedBeers$IBU == max(MergedBeers$IBU, na.rm=T))]
+```
+
+### 6. Summary statistics for the ABV variable.
+
+```{r Question 6, echo = TRUE,warning=FALSE, message=FALSE}
+##Sumary statistics for the ABV variable from the Beers dataset
+summary(Beers$ABV)
+
+## Summary statistics for the ABV variable of the merged dataset
+summary(MergedBeers$ABV)
+```
+
+### 7. Is there an apparent relationship between the bitterness of the beer and its alcoholic content? Draw a scatter plot.
+#### There seems to be an apparent relationship between the bitterness of the beer and its alcoholic content  
+```{r Question 7, echo = TRUE,warning=FALSE, message=FALSE}
+##Scatter plot between bitterness of beer and its alcoholic content
+plot(IBU~ABV, data=MergedBeers)
+abline(lm(IBU~ABV, data=MergedBeers), col="red")
+
+```
+

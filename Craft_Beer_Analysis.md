@@ -365,7 +365,18 @@ summary(MergedBeers$ABV)
 ```
 
 ```r
-hist(MergedBeers$ABV, main = "Histogram of the ABV Variable", xlab = "ABV", ylab = "Frequency")
+sd(MergedBeers$ABV, na.rm = TRUE )
+```
+
+```
+## [1] 0.01354173
+```
+
+```r
+ggplot(data=MergedBeers, aes(MergedBeers$ABV)) + 
+  geom_histogram(breaks=seq(0,0.13, by=0.005),col="gray20", fill="lightseagreen") + 
+  labs(title="Histogram of the ABV variable") +
+  labs(x="Alcohol by Volume", y="Frequency")
 ```
 
 ![](Craft_Beer_Analysis_files/figure-html/Question 6-1.png)<!-- -->
@@ -375,7 +386,7 @@ hist(MergedBeers$ABV, main = "Histogram of the ABV Variable", xlab = "ABV", ylab
 
 ```r
 ##Scatter plot between bitterness of beer and its alcoholic content
-plot(IBU~ABV, data=MergedBeers, main = "Relationship between Bitterness (IBU) and alcoholic content (ABV")
+plot(IBU~ABV, data=MergedBeers, main = "Relationship between Bitterness (IBU) and alcoholic content (ABV)")
 abline(lm(IBU~ABV, data=MergedBeers), col="red")
 ```
 

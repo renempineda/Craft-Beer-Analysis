@@ -216,14 +216,18 @@ MergedBeers[which(MergedBeers$IBU == max(MergedBeers$IBU, na.rm=T)),]
 ```{r Question 6, echo = TRUE,warning=FALSE, message=FALSE}
 ## Summary statistics for the ABV variable of the merged dataset
 summary(MergedBeers$ABV)
-hist(MergedBeers$ABV, main = "Histogram of the ABV Variable", xlab = "ABV", ylab = "Frequency")
+sd(MergedBeers$ABV, na.rm = TRUE )
+ggplot(data=MergedBeers, aes(MergedBeers$ABV)) + 
+  geom_histogram(breaks=seq(0,0.13, by=0.005),col="gray20", fill="lightseagreen") + 
+  labs(title="Histogram of the ABV variable") +
+  labs(x="Alcohol by Volume", y="Frequency")
 ```
 
 ### 7. Is there an apparent relationship between the bitterness of the beer and its alcoholic content? Draw a scatter plot.
 
 ```{r Question 7, echo = TRUE,warning=FALSE, message=FALSE}
 ##Scatter plot between bitterness of beer and its alcoholic content
-plot(IBU~ABV, data=MergedBeers, main = "Relationship between Bitterness (IBU) and alcoholic content (ABV")
+plot(IBU~ABV, data=MergedBeers, main = "Relationship between Bitterness (IBU) and alcoholic content (ABV)")
 abline(lm(IBU~ABV, data=MergedBeers), col="red")
 cor(MergedBeers$IBU, MergedBeers$ABV, use = "pairwise.complete.obs")
 ```

@@ -329,19 +329,19 @@ getwd()
 ```
 
 ```
-## [1] "C:/Users/chux/Downloads/study1/study1/Rene Pineda Analysis"
+
 ```
 
 ```{r, echo=FALSE}
 #Rene's working directory
-#setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6306 Doing Data Science/Craft Beer Analysis/Rene Pineda Analysis")
+setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6306 Doing Data Science/Craft Beer Analysis")
 
 #Mahesh's working directory
 #setwd("E:/Mahesh/SMU/MSDS6306 Doing Data Science/Homework/Craft-Beer-Analysis")
 
 #Chaoshun's working directory
 #setwd("C:/Users/chux/Downloads/study1/study1")
-setwd("/Users/chux/Desktop/datascience/Homework/Doing_Data_Science/study1")
+#setwd("/Users/chux/Desktop/datascience/Homework/Doing_Data_Science/study1")
 #Set up your working directory here
 
 #Load additional packages

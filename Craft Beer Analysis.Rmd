@@ -30,28 +30,34 @@ The craft brewer definition is: An American craft brewer is small, independent, 
 
 * Traditional: A brewer which has a majority of its total beverage alcohol volume in beers whose flavors derive from traditional or innovative brewing ingredients and their fermentation. Flavored Malt Beverages (FMBs) are not considered beers.
 
-Due to the small size and explosive growth of craft breweries, the total number of breweries rose from 42 in 1978 to over 2,750 in 2012. This also produces a large amount of data, suitable to be analyzed with Data Science tools and techniques.
+Due to the small size and explosive growth of craft breweries, the total number of breweries rose from 42 in 1978 to over 2,750 in 2012. This also produces a large amount of data, suitable to be analyzed with Data Science tools and techniques.For this analysis, we use a database with information about 2,410 different beers manufactured by more than 550 producers in the U.S. 
 
 ## **Section 2** Preparatory Steps
 
 ```{r preparatory steps, echo=TRUE, warning=FALSE, message=FALSE}
-# Check the working directory
-getwd()
-
 #Rene's working directory
-#setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6306 Doing Data Science/Craft Beer Analysis/Rene Pineda Analysis")
+setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6306 Doing Data Science/Craft Beer Analysis")
 
 #Mahesh's working directory
 #setwd("E:/Mahesh/SMU/MSDS6306 Doing Data Science/Homework/Craft-Beer-Analysis")
 
 #Chaoshun's working directory
 #setwd("C:/Users/chux/Downloads/study1/study1")
-setwd("/Users/chux/Desktop/datascience/Homework/Doing_Data_Science/study1")
+#setwd("/Users/chux/Desktop/datascience/Homework/Doing_Data_Science/study1")
 #Set up your working directory here
 
 #Load additional packages
 library(dplyr)
 library(ggplot2)
+library(ggmap)
+library(maps)
+library(mapdata)
+library(dplyr)
+library(tm)
+library(SnowballC)
+library(wordcloud)
+library(RColorBrewer)
+library(car)
       
 # Load the datasets
 Beers <- read.csv("Beers.csv", header = TRUE)
@@ -62,13 +68,13 @@ str(Beers)
 summary(Beers[,c(3,4,7)])
 str(Breweries)
 ```
-## **Section 3** Questions
+## **Section 3 Questions**
 
 ### Question 1. How many breweries are present in each State?
 ```{r Question 1, echo = TRUE,warning=FALSE, message=FALSE}
 table(Breweries$State, useNA = "no")
 ```
-The distribution of breweries in each State can be seen in the following table:
+#### The distribution of breweries in each State can be seen in the following table:
 
 State|Number of Breweries
 -----|-------------------
@@ -124,6 +130,31 @@ WI   |20
 WV   |1
 WY   |4
 
+We'll create a heat map to analyze in which States craft breweries are more popular
+```{r HeatMap, echo=TRUE, warning=FALSE, message=FALSE}
+#Use map data
+usa <- map_data("usa")
+states <- map_data("state")
+#Create Table
+BreweriesState <- as.data.frame(table(Breweries$State, useNA = "no"))
+
+#Eliminate HI and AK observations
+BreweriesState <- BreweriesState[c(2:11,13:51),]
+#Reordering the observations to match State names in the table
+BreweriesState <- BreweriesState[(c(1,3,2,4:6,8,7,9:10,12,13,14,11,15:17,20,19,18,21:22,24,23,25,28,32,29,30,31,33,26,27,34:43,45,44,46,48,47,49)),]
+#Create table with State Names
+StateNames <- unique(states$region)
+#Join the tables
+BreweriesState <- cbind(BreweriesState, StateNames)
+names(BreweriesState) <- c("State.abb", "Number.of.Breweries", "region")
+BreweriesState.map <- inner_join(states, BreweriesState, by = "region")
+#Create the map
+ggplot(data = BreweriesState.map) +
+  geom_polygon(aes(x = long, y = lat, fill = Number.of.Breweries, group = group), color = "black") +
+  coord_fixed(1.3) +
+  scale_fill_gradientn(colours=rev(heat.colors(10)),na.value="grey90")
+```
+
 ### Question 2. Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.
 
 ```{r Question 2, echo=TRUE,warning=FALSE, message=FALSE}
@@ -135,12 +166,8 @@ Beers <- rename(Beers, Brewery_ID = Brewery_id, Beer_Name = Name)
 #Order the data by Brewery and Beer_ID (not necessary because we are using the merge command, but useful anyway)
 Beers <- Beers[order(Beers$Brewery_ID,Beers$Beer_ID),]
 
-#Check if the Brewery_ID values are the same in order to make sure they can be easily merged
-unique(Beers$Brewery_ID) == unique(Breweries$Brewery_ID)
-
 #Merge the datasets by Brewery_ID
 MergedBeers <- merge(x = Beers, y = Breweries, by = "Brewery_ID", all = TRUE)
-str(MergedBeers)
 
 ### Print the first 6 observations and the last six observations to check the merged file.
 head(MergedBeers, 6)
@@ -151,68 +178,110 @@ tail(MergedBeers, 6)
 ```{r Question 3, echo=TRUE,warning=FALSE, message=FALSE}
 sapply(MergedBeers, function(y) sum(is.na(y)))
 ```
-Two columns have NA's: ABV has 62 and IBU has 1005, out of 2410 total rows
+#### Two columns have NA's: ABV has 62 and IBU has 1005, out of 2410 total rows
 
-### 4. Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare.
+### Question 4. Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare.
 
 ```{r Question 4, echo = TRUE,warning=FALSE, message=FALSE}
 ## First do not select data with NA as their mean would be NA then so use split MergedBeers on state and
 ## get the mean of the split values with na.rm = TRUE
 ABV.median <- sapply(split(MergedBeers, MergedBeers$State), function(y) median(y$ABV, na.rm = TRUE))
-
 IBU.median <- sapply(split(MergedBeers, MergedBeers$State), function(y) median(y$IBU, na.rm = TRUE))
 
 ## Sort it in descending order
 ABV.median.sort <- ABV.median[order(-ABV.median)]
-
 IBU.median.sort <- IBU.median[order(-IBU.median)]
 
 ##plot a bar chart to compare
 ##Barplot of ABV value(s) vs State
-barplot(ABV.median.sort, main="ABV vs State", xlab="State", ylab="ABV Value(s)", las=2)
+barplot(ABV.median.sort, main="ABV vs State", xlab="State", ylab="ABV Value(s)", las=2, cex.names = 0.7)
 ##Barplot of IBU value(s) vs State
-barplot(IBU.median.sort, main="IBU vs State", xlab="State", ylab="IBU Value(s)", las=2)
+barplot(IBU.median.sort, main="IBU vs State", xlab="State", ylab="IBU Value(s)", las=2, cex.names = 0.7)
 ```
 
-### 5. Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?
-#### State that has maximum alcoholic (ABV) beer is CO.  
-#### State that has most bitter (IBU) beer is OR.  
+### Question 5. Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?
+ 
 ```{r Question 5, echo = TRUE,warning=FALSE, message=FALSE}
 ##State with maximum alcoholic (ABV) beer
-which(MergedBeers$ABV == max(MergedBeers$ABV, na.rm=TRUE))
-
-MergedBeers$State[which(MergedBeers$ABV == max(MergedBeers$ABV, na.rm=T))]
+MergedBeers[which(MergedBeers$ABV == max(MergedBeers$ABV, na.rm=T)),]
 
 ## State with maximum alcoholic (IBU) beer
-MergedBeers$State[which(MergedBeers$IBU == max(MergedBeers$IBU, na.rm=T))]
+MergedBeers[which(MergedBeers$IBU == max(MergedBeers$IBU, na.rm=T)),]
 ```
+#### The State that has maximum alcoholic (ABV) beer is CO, and it's the "Lee Hill Series Vol. 5", a Quadrupel Ale with 0.128 ABV
+#### The State that has most bitter (IBU) beer is OR, and it's the "Bitter Bitch", an Imperial IPA with 138 IBU.
 
-### 6. Summary statistics for the ABV variable.
+### Question 6. Summary statistics for the ABV variable.
 
 ```{r Question 6, echo = TRUE,warning=FALSE, message=FALSE}
-##Sumary statistics for the ABV variable from the Beers dataset
-summary(Beers$ABV)
-
 ## Summary statistics for the ABV variable of the merged dataset
 summary(MergedBeers$ABV)
+hist(MergedBeers$ABV, main = "Histogram of the ABV Variable", xlab = "ABV", ylab = "Frequency")
 ```
 
 ### 7. Is there an apparent relationship between the bitterness of the beer and its alcoholic content? Draw a scatter plot.
-#### There seems to be an apparent relationship between the bitterness of the beer and its alcoholic content  
+
 ```{r Question 7, echo = TRUE,warning=FALSE, message=FALSE}
 ##Scatter plot between bitterness of beer and its alcoholic content
-plot(IBU~ABV, data=MergedBeers)
+plot(IBU~ABV, data=MergedBeers, main = "Relationship between Bitterness (IBU) and alcoholic content (ABV")
 abline(lm(IBU~ABV, data=MergedBeers), col="red")
+cor(MergedBeers$IBU, MergedBeers$ABV, use = "pairwise.complete.obs")
+```
+#### Looking at the scatterplot, there seems to be an apparent relationship between the bitterness of the beer and its alcoholic content.Additionally, we have fitted a regression line to show the positive relationship. Additionally, we've calculated the correlation between bitternes and alcoholic content, resulting in a value of 0.67. This is all evidence in favor of a positive relationship betwen the variables. 
 
+### Additional analysis
+
+#### Additional Analysis 1. Which styles of beer are more popular?
+We'll create a barplot with the most popular beer styles:
+```{r Bar plot of beer styles}
+# Create and sort the data
+StyleFreqTable <- as.data.frame(table(Beers$Style))
+StyleFreqTable <- StyleFreqTable[order(-StyleFreqTable$Freq),]
+names(StyleFreqTable) <- c("Style", "Frequency")
+# Plot the data
+ggplot(data = StyleFreqTable[1:20,], aes(x = reorder(Style, -Frequency), y = Frequency)) +
+  geom_bar(aes(fill = Style), stat = "identity", fill = "lightblue", color = "black") +
+  labs(title = "Most popular Styles of Beer", x = "Style of Beer", y = "Frequency") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 
-## **Section 4** Conclusions
-In summary, this primary objective of this work is to take two different data files which are beer and breweries data, read the data from the a csv file into a data frame, inspect and understand the structure of the data, merge the data frames, and perform some analysis on the final data set.
+#### Additional analysis 2. What words are more common in Beer names?
+We'll create a word cloud to visualize which words are popular for beer names (we've not included the words american, ipa, pale, ale, and lager)
 
-As Data Scientist, it is very rare to work only on a single perfect data and thus a large percentage of work will be accept different datasets, merge different available data sets before processing it as illustrated in this work. After preparing the data, statistical inference can then be made to the data. 
+```{r word cloud}
+#Create file with the text of the Beer Names
+text <- as.character(Beers$Beer_Name)
+docs <- Corpus(VectorSource(text))
+toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+docs <- tm_map(docs, toSpace, "/")
 
-Based on the analysis, California and Colorado are top two which have most breweries. If order the all the data by Brewery and Beer IDs. The first six observations include beer names: Parapet ESB, Stronghold, Pumpion, Wall's End, Maggie's Leap and Get Together. The last 6 obervations include beer names: Pilsner Ukiah, Porkslap Pale Ale, Moo Thunder Stout, Snapperhead IPA, Heinnieweisse Weissebier and Urban Wilderness Pale Ale; Out of 2410 total rows of the data, there are two columns having NA's: ABV has 62 and IBU has 1005. 
+# Convert the text to lower case
+docs <- tm_map(docs, content_transformer(tolower))
+# specify your stopwords as a character vector
+docs <- tm_map(docs, removeWords, c("american","#", "the", "ale", "ipa", "pale", "lager"))
+# Remove numbers
+docs <- tm_map(docs, removeNumbers)
+# Eliminate extra white spaces
+docs <- tm_map(docs, stripWhitespace)
 
-After computing the median alcohol content and international bitterness unit for each state. DC has the highest median ABV, MS has the highest median IBV; UT has the lowest median ABV, SD has the lowest median IBV. But Co has the mximum alcoholic (ABV) beer and OR has the most bitter(IBU) beer. Afer running the summary statistics to ABV variable, the min ABV is 0.001 and the max ABV is 0.128. The Mean is 0.05977 and the median is 0.056. It has a littble bit skewness here. Based on the scatter plot, there is no linear relation between the bitterness of the beer and the alcoholic cotent.
+dtm <- TermDocumentMatrix(docs)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+#Create Word Cloud
+set.seed(1234)
+wordcloud(words = d$word, freq = d$freq, min.freq = 10,
+          max.words=200, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"))
+```
+
+## **Section 4 Conclusions**
+The primary objective of this work is to provide the Brewers Association with insights that can help to understand the craft beers industry, using sample data from producers in the United States.
+
+In order to accomplish this, we take two different data files which are beer and breweries data, read the data from the a csv file into a data frame, inspect and understand the structure of the data, merge the data frames, and perform some analysis on the final data set.As Data Scientists, it is very rare to work only on a single perfect data set, and thus a large percentage of work will be to gather different datasets, and to clean and merge them before the analysis starts, as illustrated in this work. After preparing the data, statistical inference can then be made to the data. 
+
+Based on the analysis, California and Colorado are the top two States. When we order all the data by Brewery and Beer IDs, . The first six observations include beer names: Parapet ESB, Stronghold, Pumpion, Wall's End, Maggie's Leap and Get Together. The last 6 obervations include beer names: Pilsner Ukiah, Porkslap Pale Ale, Moo Thunder Stout, Snapperhead IPA, Heinnieweisse Weissebier and Urban Wilderness Pale Ale; Out of 2410 total rows of the data, there are two columns having NA's: ABV has 62 and IBU has 1005. 
+
+After computing the median alcohol content and international bitterness unit for each state. DC has the highest median ABV, MS has the highest median IBV; UT has the lowest median ABV, SD has the lowest median IBV. The State of Colorado has the maximum alcoholic (ABV) beer and Oregon has the most bitter(IBU) beer. Afer running the summary statistics to ABV variable, the min ABV is 0.001 and the max ABV is 0.128. The Mean is 0.05977 and the median is 0.056. It has a littble bit skewness here. Based on the scatter plot, we can see that there is a noticeable positive, linear relationship between the bitterness of the beer and the alcoholic content.
 
